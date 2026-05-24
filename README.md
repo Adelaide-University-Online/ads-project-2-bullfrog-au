@@ -16,3 +16,24 @@ ADSAssignmentStarter/
 ```
 
 **Good luck with your assignments!** 🚀
+
+
+
+Notes:
+
+- You can assume that each course will run in all Study Periods. 
+- students will provide the name of a text file and a number which indicates how many courses they can study concurrently
+- The tool should return the courses the student needs to study, and the order they will study them in (broken into the different study periods).
+
+1. Graph Representation: 
+    - Implement a graph data structure to represent the network of courses. Each course should be a vertex, and edges should represent pre-requisites between courses. 
+    - Choose and justify an appropriate representation method (e.g., adjacency matrix, adjacency list) based on the characteristics of the problem. 
+    - Choose and justify an appropriate graph directionality (e.g. directed or undirected) and weighting (e.g. weighted or unweighted) based on the characteristics of the problem. 
+    - Read the data from the text file and construct the Graph. 
+1. Solving the problem: 
+    - Once you have created your graph you need to solve the problem and implement the solution in code. 
+1. Explain and justify your solution: 
+    - Record a 4-10 minute video walking through how you solved the problem and the decisions you made as you completed the task. 
+    - Your video should be well-prepared, paced and clearly show your code and the output it generates. 
+    - Your recording should be aimed at another technical person. Imagine you are talking with a colleague who is working on another project that is going to use your code. 
+    - This is your opportunity to explain what you have done and why. Points are given for explaining your code and for discussing why you have chosen that approach. 
