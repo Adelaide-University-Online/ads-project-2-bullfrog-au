@@ -1,10 +1,10 @@
 /**
 * File: filename.java
 * Description: A brief description of this Java module.
-* Author: Steve Jobs
-* Student ID: 12345678
-* Email ID: jobst007
-* AI Tool Used: Y/N (This includes all AI Tools e.g. ChatGPT, Microsoft or Github Copiliot etc... Please leave blank if you do not wish to share this information)
+* Author: Tom Jeremiah
+* Student ID: a2970593@adelaide.edu.au
+* Email ID: tom.jeremiah@student.adelaide.edu.au
+* AI Tool Used: 
 * This is my own work as defined by
 *    the University's Academic Integrity Policy.
 **/
