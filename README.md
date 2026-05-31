@@ -37,3 +37,9 @@ Notes:
     - Your video should be well-prepared, paced and clearly show your code and the output it generates. 
     - Your recording should be aimed at another technical person. Imagine you are talking with a colleague who is working on another project that is going to use your code. 
     - This is your opportunity to explain what you have done and why. Points are given for explaining your code and for discussing why you have chosen that approach. 
+
+## Program Implementation and Testing
+
+This project implements a degree scheduling tool using a directed graph of courses and prerequisites. `FileParser` reads the input file into a `Graph`, `DegreePlanner` generates a study-period schedule while respecting dependencies and concurrency limits, and `Runner` provides the interactive command-line workflow.
+
+Unit testing is implemented with JUnit4 in `src/test` with one test class per production class (`CourseTest`, `GraphTest`, `FileParserTest`, `DegreePlannerTest`, and `RunnerTest`). Tests cover normal flow, edge cases, and invalid inputs, and they use `junit.Assert` assertions throughout.
