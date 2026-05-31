@@ -10,6 +10,7 @@
  */
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,8 +20,17 @@ import java.util.Scanner;
  * and produces an optimal schedule respecting prerequisite constraints.
  */
 public class Runner {
-    private static final Scanner scanner = new Scanner(System.in);
-    private static boolean running = true;
+    private final Scanner scanner;
+    private final PrintStream out;
+    private final PrintStream err;
+    private boolean running;
+
+    public Runner(Scanner scanner, PrintStream out, PrintStream err) {
+        this.scanner = scanner;
+        this.out = out;
+        this.err = err;
+        this.running = true;
+    }
 
     /**
      * Main method to run the degree planner with interactive CLI.
@@ -29,8 +39,13 @@ public class Runner {
      * @param args command-line arguments (not used; interactive input only)
      */
     public static void main(String[] args) {
+        Runner runner = new Runner(new Scanner(System.in), System.out, System.err);
+        runner.run();
+    }
+
+    void run() {
         displayWelcome();
-        
+
         while (running) {
             try {
                 String filePath = promptForFilePath();
@@ -48,15 +63,15 @@ public class Runner {
                 if (!promptToContinue()) {
                     running = false;
                 }
-                
+
             } catch (Exception e) {
-                System.err.println("\n[ERROR] Unexpected error: " + e.getMessage());
+                err.println("\n[ERROR] Unexpected error: " + e.getMessage());
                 if (!handleError()) {
                     running = false;
                 }
             }
         }
-        
+
         displayGoodbye();
         scanner.close();
     }
@@ -64,21 +79,21 @@ public class Runner {
     /**
      * Displays the welcome message.
      */
-    private static void displayWelcome() {
-        System.out.println("\n╔════════════════════════════════════════════╗");
-        System.out.println("║     OptiTime - Degree Planner v1.0         ║");
-        System.out.println("║   Optimize Your Degree Schedule             ║");
-        System.out.println("╚════════════════════════════════════════════╝\n");
+    void displayWelcome() {
+        out.println("\n╔════════════════════════════════════════════╗");
+        out.println("║     OptiTime - Degree Planner v1.0         ║");
+        out.println("║   Optimize Your Degree Schedule             ║");
+        out.println("╚════════════════════════════════════════════╝\n");
     }
 
     /**
      * Displays the goodbye message.
      */
-    private static void displayGoodbye() {
-        System.out.println("\n╔════════════════════════════════════════════╗");
-        System.out.println("║          Thank you for using OptiTime!      ║");
-        System.out.println("║        Goodbye and good luck!               ║");
-        System.out.println("╚════════════════════════════════════════════╝\n");
+    void displayGoodbye() {
+        out.println("\n╔════════════════════════════════════════════╗");
+        out.println("║          Thank you for using OptiTime!      ║");
+        out.println("║        Goodbye and good luck!               ║");
+        out.println("╚════════════════════════════════════════════╝\n");
     }
 
     /**
@@ -86,14 +101,14 @@ public class Runner {
      *
      * @return the file path entered by the user, or null if user chooses to exit
      */
-    private static String promptForFilePath() {
+    String promptForFilePath() {
         while (true) {
-            System.out.println("\n--- Step 1: Input File Path ---");
-            System.out.print("Enter the path to your degree file: ");
+            out.println("\n--- Step 1: Input File Path ---");
+            out.print("Enter the path to your degree file: ");
             String filePath = scanner.nextLine().trim();
             
             if (filePath.isEmpty()) {
-                System.out.println("[WARNING] File path cannot be empty.");
+                out.println("[WARNING] File path cannot be empty.");
                 if (!promptToRetry("Enter file path")) {
                     return null;
                 }
@@ -103,8 +118,8 @@ public class Runner {
             // Verify file exists
             java.io.File file = new java.io.File(filePath);
             if (!file.exists()) {
-                System.out.println("[ERROR] File not found: " + filePath);
-                System.out.println("        Please check the file path and try again.");
+                out.println("[ERROR] File not found: " + filePath);
+                out.println("        Please check the file path and try again.");
                 if (!promptToRetry("Enter file path")) {
                     return null;
                 }
@@ -112,14 +127,14 @@ public class Runner {
             }
             
             if (!file.isFile()) {
-                System.out.println("[ERROR] Path is not a file: " + filePath);
+                out.println("[ERROR] Path is not a file: " + filePath);
                 if (!promptToRetry("Enter file path")) {
                     return null;
                 }
                 continue;
             }
             
-            System.out.println("✓ File path accepted: " + filePath);
+            out.println("✓ File path accepted: " + filePath);
             return filePath;
         }
     }
@@ -129,14 +144,14 @@ public class Runner {
      *
      * @return the concurrency limit, or 0 if user chooses to exit
      */
-    private static int promptForConcurrency() {
+    int promptForConcurrency() {
         while (true) {
-            System.out.println("\n--- Step 2: Maximum Concurrent Courses ---");
-            System.out.print("Enter the maximum number of courses you can take at once: ");
+            out.println("\n--- Step 2: Maximum Concurrent Courses ---");
+            out.print("Enter the maximum number of courses you can take at once: ");
             String input = scanner.nextLine().trim();
             
             if (input.isEmpty()) {
-                System.out.println("[WARNING] Input cannot be empty.");
+                out.println("[WARNING] Input cannot be empty.");
                 if (!promptToRetry("Enter concurrency")) {
                     return 0;
                 }
@@ -147,8 +162,8 @@ public class Runner {
             try {
                 maxConcurrent = Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("[ERROR] Invalid input: '" + input + "' is not a valid integer.");
-                System.out.println("        Please enter a whole number.");
+                out.println("[ERROR] Invalid input: '" + input + "' is not a valid integer.");
+                out.println("        Please enter a whole number.");
                 if (!promptToRetry("Enter concurrency")) {
                     return 0;
                 }
@@ -156,8 +171,8 @@ public class Runner {
             }
             
             if (maxConcurrent < 1) {
-                System.out.println("[ERROR] Concurrency must be at least 1.");
-                System.out.println("        You entered: " + maxConcurrent);
+                out.println("[ERROR] Concurrency must be at least 1.");
+                out.println("        You entered: " + maxConcurrent);
                 if (!promptToRetry("Enter concurrency")) {
                     return 0;
                 }
@@ -165,8 +180,8 @@ public class Runner {
             }
             
             if (maxConcurrent > 50) {
-                System.out.println("[WARNING] Very high concurrency value (" + maxConcurrent + ").");
-                System.out.print("Do you want to proceed anyway? (yes/no): ");
+                out.println("[WARNING] Very high concurrency value (" + maxConcurrent + ").");
+                out.print("Do you want to proceed anyway? (yes/no): ");
                 String response = scanner.nextLine().trim().toLowerCase();
                 if (!response.equals("yes") && !response.equals("y")) {
                     if (!promptToRetry("Enter concurrency")) {
@@ -176,7 +191,7 @@ public class Runner {
                 }
             }
             
-            System.out.println("✓ Concurrency limit accepted: " + maxConcurrent + " course(s)");
+            out.println("✓ Concurrency limit accepted: " + maxConcurrent + " course(s)");
             return maxConcurrent;
         }
     }
@@ -190,56 +205,56 @@ public class Runner {
      * @throws IllegalArgumentException if the course structure is invalid
      * @throws IllegalStateException if scheduling fails
      */
-    private static void runDegreePlanner(String filePath, int maxConcurrent) 
+    void runDegreePlanner(String filePath, int maxConcurrent) 
             throws IOException, IllegalArgumentException, IllegalStateException {
         
-        System.out.println("\n--- Processing Your Degree ---");
+        out.println("\n--- Processing Your Degree ---");
         
         // Parse the input file
-        System.out.println("▶ Reading course data from: " + filePath);
+        out.println("▶ Reading course data from: " + filePath);
         Graph graph = FileParser.parseFile(filePath);
-        System.out.println("  ✓ File parsed successfully");
+        out.println("  ✓ File parsed successfully");
 
         // Validate the graph
-        System.out.println("▶ Validating course structure...");
+        out.println("▶ Validating course structure...");
         FileParser.validateGraph(graph);
-        System.out.println("  ✓ No circular dependencies detected");
-        System.out.println("  ✓ All prerequisites are valid");
+        out.println("  ✓ No circular dependencies detected");
+        out.println("  ✓ All prerequisites are valid");
 
         // Display graph information
-        System.out.println("\n--- Degree Summary ---");
-        System.out.println("  Total Courses: " + graph.getSize());
-        System.out.println("  Max Concurrent: " + maxConcurrent);
+        out.println("\n--- Degree Summary ---");
+        out.println("  Total Courses: " + graph.getSize());
+        out.println("  Max Concurrent: " + maxConcurrent);
 
         // Plan the degree
-        System.out.println("\n▶ Planning optimal degree schedule...");
+        out.println("\n▶ Planning optimal degree schedule...");
         DegreePlanner planner = new DegreePlanner(graph, maxConcurrent);
         List<List<Course>> schedule = planner.planDegree();
-        System.out.println("  ✓ Schedule generated successfully");
+        out.println("  ✓ Schedule generated successfully");
 
         // Display the schedule
-        System.out.println("\n╔════════════════════════════════════════════╗");
-        System.out.println("║      OPTIMIZED DEGREE SCHEDULE              ║");
-        System.out.println("╚════════════════════════════════════════════╝\n");
+        out.println("\n╔════════════════════════════════════════════╗");
+        out.println("║      OPTIMIZED DEGREE SCHEDULE              ║");
+        out.println("╚════════════════════════════════════════════╝\n");
         
-        System.out.println("Total Study Periods Required: " + planner.getTotalPeriods() + "\n");
+        out.println("Total Study Periods Required: " + planner.getTotalPeriods() + "\n");
 
         for (int period = 0; period < schedule.size(); period++) {
             List<Course> coursesInPeriod = schedule.get(period);
-            System.out.println("Study Period " + (period + 1) + " (" + 
+            out.println("Study Period " + (period + 1) + " (" + 
                                coursesInPeriod.size() + " course" + 
                                (coursesInPeriod.size() != 1 ? "s" : "") + "):");
             for (Course course : coursesInPeriod) {
-                System.out.println("  • " + course.getCourseCode());
+                out.println("  • " + course.getCourseCode());
             }
-            System.out.println();
+            out.println();
         }
 
-        System.out.println("═══════════════════════════════════════════════");
-        System.out.println("All " + graph.getSize() + " courses scheduled across " + 
+        out.println("═══════════════════════════════════════════════");
+        out.println("All " + graph.getSize() + " courses scheduled across " + 
                          planner.getTotalPeriods() + " study period" +
                          (planner.getTotalPeriods() != 1 ? "s" : "") + ".");
-        System.out.println("═══════════════════════════════════════════════");
+        out.println("═══════════════════════════════════════════════");
     }
 
     /**
@@ -247,11 +262,11 @@ public class Runner {
      *
      * @return true if user wants to continue, false if user wants to terminate
      */
-    private static boolean handleError() {
-        System.out.println("\nWould you like to:");
-        System.out.println("  1. Try again");
-        System.out.println("  2. Terminate");
-        System.out.print("Enter your choice (1 or 2): ");
+    boolean handleError() {
+        out.println("\nWould you like to:");
+        out.println("  1. Try again");
+        out.println("  2. Terminate");
+        out.print("Enter your choice (1 or 2): ");
         
         String choice = scanner.nextLine().trim();
         return choice.equals("1");
@@ -263,8 +278,8 @@ public class Runner {
      * @param operation the operation description (e.g., "Enter file path")
      * @return true if user wants to retry, false otherwise
      */
-    private static boolean promptToRetry(String operation) {
-        System.out.print("Would you like to " + operation + " again? (yes/no): ");
+    boolean promptToRetry(String operation) {
+        out.print("Would you like to " + operation + " again? (yes/no): ");
         String response = scanner.nextLine().trim().toLowerCase();
         return response.equals("yes") || response.equals("y");
     }
@@ -274,8 +289,8 @@ public class Runner {
      *
      * @return true if user wants to continue, false if user wants to exit
      */
-    private static boolean promptToContinue() {
-        System.out.println("\nWould you like to plan another degree? (yes/no): ");
+    boolean promptToContinue() {
+        out.println("\nWould you like to plan another degree? (yes/no): ");
         String response = scanner.nextLine().trim().toLowerCase();
         return response.equals("yes") || response.equals("y");
     }
