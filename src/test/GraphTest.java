@@ -6,6 +6,7 @@ import org.junit.Test;
 
 public class GraphTest {
 
+    // Verifies the graph does not duplicate a course when added twice.
     @Test
     public void addCourseAddsNewAndIgnoresDuplicate() {
         Graph graph = new Graph();
@@ -17,6 +18,7 @@ public class GraphTest {
         Assert.assertTrue(graph.containsCourse("COMP1000"));
     }
 
+    // Confirms null course codes are rejected before the graph is mutated.
     @Test(expected = IllegalArgumentException.class)
     public void addPrerequisiteRejectsNullCourseCode() {
         Graph graph = new Graph();
@@ -24,6 +26,7 @@ public class GraphTest {
         graph.addPrerequisite(null, "COMP1000");
     }
 
+    // Confirms empty prerequisite codes are rejected as invalid input.
     @Test(expected = IllegalArgumentException.class)
     public void addPrerequisiteRejectsEmptyPrerequisiteCode() {
         Graph graph = new Graph();
@@ -31,6 +34,7 @@ public class GraphTest {
         graph.addPrerequisite("COMP2000", "");
     }
 
+    // Uses a simple dependency fixture to verify missing courses are created automatically.
     @Test
     public void addPrerequisiteAutoCreatesCoursesAndLinksThem() {
         Graph graph = new Graph();
@@ -44,6 +48,7 @@ public class GraphTest {
         Assert.assertEquals("COMP1000", course.getPrerequisites().get(0).getCourseCode());
     }
 
+    // Verifies lookups return null when the course code has never been added.
     @Test
     public void getCourseReturnsNullForMissingCourse() {
         Graph graph = new Graph();
@@ -51,6 +56,7 @@ public class GraphTest {
         Assert.assertNull(graph.getCourse("MISSING"));
     }
 
+    // Confirms the graph exposes every inserted course through the collection view.
     @Test
     public void getAllCoursesReturnsAllInsertedCourses() {
         Graph graph = new Graph();
@@ -68,6 +74,7 @@ public class GraphTest {
         Assert.assertTrue(codes.contains("COMP2000"));
     }
 
+    // Uses an acyclic prerequisite chain fixture to verify cycle detection stays false.
     @Test
     public void hasCycleReturnsFalseForAcyclicGraph() {
         Graph graph = new Graph();
@@ -77,6 +84,7 @@ public class GraphTest {
         Assert.assertFalse(graph.hasCycle());
     }
 
+    // Uses a two-node cycle fixture to verify cycle detection reports true.
     @Test
     public void hasCycleReturnsTrueForCyclicGraph() {
         Graph graph = new Graph();
@@ -86,6 +94,7 @@ public class GraphTest {
         Assert.assertTrue(graph.hasCycle());
     }
 
+    // Confirms structural equality and hash code behavior for equivalent graphs.
     @Test
     public void equalsAndHashCodeMatchForEquivalentGraphs() {
         Graph first = new Graph();
@@ -98,6 +107,7 @@ public class GraphTest {
         Assert.assertEquals(first.hashCode(), second.hashCode());
     }
 
+    // Verifies the string form includes the header and the linked course codes.
     @Test
     public void toStringIncludesGraphHeaderAndCourseCodes() {
         Graph graph = new Graph();

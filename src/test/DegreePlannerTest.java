@@ -6,6 +6,7 @@ import org.junit.Test;
 
 public class DegreePlannerTest {
 
+    // Confirms invalid concurrency limits are rejected at construction time.
     @Test(expected = IllegalArgumentException.class)
     public void constructorRejectsInvalidConcurrency() {
         Graph graph = new Graph();
@@ -13,6 +14,7 @@ public class DegreePlannerTest {
         new DegreePlanner(graph, 0);
     }
 
+    // Uses a linear dependency chain fixture to verify prerequisite ordering in the schedule.
     @Test
     public void planDegreeSchedulesAllCoursesRespectingPrerequisites() {
         Graph graph = new Graph();
@@ -29,6 +31,7 @@ public class DegreePlannerTest {
         Assert.assertEquals("COMP3000", schedule.get(2).get(0).getCourseCode());
     }
 
+    // Uses four independent courses to confirm the planner respects the concurrency cap.
     @Test
     public void planDegreeRespectsMaxConcurrencyAndCompletesAllCourses() {
         Graph graph = new Graph();
@@ -52,6 +55,7 @@ public class DegreePlannerTest {
         Assert.assertEquals(2, planner.getMaxConcurrentCourses());
     }
 
+    // Uses a cyclic graph fixture to verify planning fails when no progress is possible.
     @Test
     public void planDegreeThrowsWhenNoCourseCanBeScheduled() {
         Graph graph = new Graph();
@@ -68,6 +72,7 @@ public class DegreePlannerTest {
         }
     }
 
+    // Confirms schedule accessors report an empty plan before planning runs.
     @Test
     public void getScheduleReturnsEmptyBeforePlanning() {
         Graph graph = new Graph();
@@ -79,6 +84,7 @@ public class DegreePlannerTest {
         Assert.assertEquals(0, planner.getTotalPeriods());
     }
 
+    // Verifies planner equality contract and toString output after generating a schedule.
     @Test
     public void equalsHashCodeAndToStringBehaveAsExpected() {
         Graph firstGraph = new Graph();

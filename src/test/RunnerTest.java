@@ -11,6 +11,7 @@ import org.junit.Test;
 
 public class RunnerTest {
 
+    // Fixture helper that wires a Runner to in-memory input and output streams.
     private Runner newRunner(String input, ByteArrayOutputStream outBuffer, ByteArrayOutputStream errBuffer) {
         Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
         PrintStream out = new PrintStream(outBuffer);
@@ -18,12 +19,14 @@ public class RunnerTest {
         return new Runner(scanner, out, err);
     }
 
+    // Fixture helper that creates a temporary degree definition file for CLI flow tests.
     private Path writeDegreeFile(String content) throws IOException {
         Path file = Files.createTempFile("degree-runner-test", ".txt");
         Files.write(file, content.getBytes(StandardCharsets.UTF_8));
         return file;
     }
 
+    // Confirms retry prompts accept both full and abbreviated affirmative input.
     @Test
     public void promptToRetryAcceptsYesAndY() {
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
@@ -36,6 +39,7 @@ public class RunnerTest {
         Assert.assertTrue(yRunner.promptToRetry("Enter file path"));
     }
 
+    // Confirms retry prompts reject negative input.
     @Test
     public void promptToRetryRejectsNo() {
         Runner runner = newRunner("no\n", new ByteArrayOutputStream(), new ByteArrayOutputStream());
@@ -43,6 +47,7 @@ public class RunnerTest {
         Assert.assertFalse(runner.promptToRetry("Enter file path"));
     }
 
+    // Verifies the error menu only continues when option 1 is selected.
     @Test
     public void handleErrorReturnsTrueOnlyForOptionOne() {
         Runner tryAgainRunner = newRunner("1\n", new ByteArrayOutputStream(), new ByteArrayOutputStream());
@@ -52,6 +57,7 @@ public class RunnerTest {
         Assert.assertFalse(terminateRunner.handleError());
     }
 
+    // Exercises both immediate success and invalid-input exit paths for concurrency prompts.
     @Test
     public void promptForConcurrencyHandlesValidAndInvalidInput() {
         Runner validRunner = newRunner("3\n", new ByteArrayOutputStream(), new ByteArrayOutputStream());
@@ -61,6 +67,7 @@ public class RunnerTest {
         Assert.assertEquals(0, invalidRunner.promptForConcurrency());
     }
 
+    // Verifies the high-concurrency warning path can loop and then accept a lower value.
     @Test
     public void promptForConcurrencyHandlesHighValueConfirmationFlow() {
         String input = "51\nno\nyes\n2\n";
@@ -69,6 +76,7 @@ public class RunnerTest {
         Assert.assertEquals(2, runner.promptForConcurrency());
     }
 
+    // Confirms file-path prompting returns null when the user declines to retry.
     @Test
     public void promptForFilePathReturnsNullWhenUserStopsRetrying() {
         Runner runner = newRunner("\nno\n", new ByteArrayOutputStream(), new ByteArrayOutputStream());
@@ -76,6 +84,7 @@ public class RunnerTest {
         Assert.assertNull(runner.promptForFilePath());
     }
 
+    // Uses a temporary file fixture to verify valid file paths are accepted.
     @Test
     public void promptForFilePathReturnsAcceptedExistingFile() throws IOException {
         Path file = writeDegreeFile("COMP1000\n");
@@ -85,6 +94,7 @@ public class RunnerTest {
         Assert.assertEquals(file.toString(), runner.promptForFilePath());
     }
 
+    // Uses a valid degree file fixture to verify the planner prints a schedule summary.
     @Test
     public void runDegreePlannerPrintsScheduleForValidFile() throws IOException {
         Path file = writeDegreeFile("COMP1000,COMP2000\nCOMP2000,COMP1000\n");
@@ -98,6 +108,7 @@ public class RunnerTest {
         Assert.assertTrue(output.contains("Total Study Periods Required"));
     }
 
+    // Uses a cyclic degree file fixture to verify planner execution surfaces validation errors.
     @Test
     public void runDegreePlannerThrowsForCircularDependency() throws IOException {
         Path file = writeDegreeFile("COMP1000,COMP2000\nCOMP1000,COMP2000\nCOMP2000,COMP1000\n");
@@ -111,6 +122,7 @@ public class RunnerTest {
         }
     }
 
+    // Exercises the top-level CLI loop with minimal input to confirm it exits cleanly.
     @Test
     public void runMethodCanExitImmediatelyAndPrintGoodbye() {
         Runner runner = newRunner("\nno\n", new ByteArrayOutputStream(), new ByteArrayOutputStream());

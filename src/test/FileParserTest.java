@@ -7,12 +7,14 @@ import org.junit.Test;
 
 public class FileParserTest {
 
+    // Fixture helper that writes parser input to a temporary file for file-based tests.
     private Path writeTempFile(String content) throws IOException {
         Path file = Files.createTempFile("degree-parser-test", ".txt");
         Files.write(file, content.getBytes(StandardCharsets.UTF_8));
         return file;
     }
 
+    // Uses a valid three-course fixture to confirm parsing builds the expected graph.
     @Test
     public void parseFileBuildsGraphForValidInput() throws IOException {
         Path file = writeTempFile("COMP1000,COMP2000,COMP3000\nCOMP2000,COMP1000\nCOMP3000,COMP2000\n");
@@ -25,6 +27,7 @@ public class FileParserTest {
         Assert.assertEquals("COMP1000", graph.getCourse("COMP2000").getPrerequisites().get(0).getCourseCode());
     }
 
+    // Confirms the parser rejects files that contain no usable course data.
     @Test
     public void parseFileRejectsEmptyFile() throws IOException {
         Path file = writeTempFile("\n\n");
@@ -37,6 +40,7 @@ public class FileParserTest {
         }
     }
 
+    // Uses a fixture with an undefined course row to verify header validation.
     @Test
     public void parseFileRejectsCourseNotInHeader() throws IOException {
         Path file = writeTempFile("COMP1000,COMP2000\nCOMP3000,COMP1000\n");
@@ -49,6 +53,7 @@ public class FileParserTest {
         }
     }
 
+    // Uses a fixture with an undefined prerequisite to verify reference validation.
     @Test
     public void parseFileRejectsPrerequisiteNotInHeader() throws IOException {
         Path file = writeTempFile("COMP1000,COMP2000\nCOMP2000,COMP3000\n");
@@ -61,6 +66,7 @@ public class FileParserTest {
         }
     }
 
+    // Confirms graph validation accepts an acyclic prerequisite structure.
     @Test
     public void validateGraphPassesForValidAcyclicGraph() {
         Graph graph = new Graph();
@@ -72,6 +78,7 @@ public class FileParserTest {
         Assert.assertFalse(graph.hasCycle());
     }
 
+    // Uses a cyclic graph fixture to verify validation rejects circular dependencies.
     @Test
     public void validateGraphRejectsCycle() {
         Graph graph = new Graph();
@@ -86,6 +93,7 @@ public class FileParserTest {
         }
     }
 
+    // Verifies the stateless parser still has stable equality, hash, and string behavior.
     @Test
     public void equalsHashCodeAndToStringBehaveAsExpected() {
         FileParser first = new FileParser();
