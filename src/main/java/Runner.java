@@ -25,6 +25,17 @@ public class Runner {
     private final PrintStream err;
     private boolean running;
 
+    /**
+     * Constructs a Runner with the given I/O streams.
+     * Keeping streams injectable rather than hard-wiring System.in/out allows
+     * test code to capture output and supply scripted input without spawning
+     * a real process.
+     *
+     * @param scanner the input source for user responses
+     * @param out the stream for normal program output
+     * @param err the stream for error messages (kept separate so callers can
+     *            redirect errors independently of standard output)
+     */
     public Runner(Scanner scanner, PrintStream out, PrintStream err) {
         this.scanner = scanner;
         this.out = out;
@@ -43,6 +54,13 @@ public class Runner {
         runner.run();
     }
 
+    /**
+     * Drives the interactive session loop.
+     * Each iteration collects a file path and concurrency limit, runs the planner,
+     * then asks whether the user wants another run — allowing exploration of different
+     * concurrency settings without restarting the program.
+     * The loop exits cleanly on user request or on an unrecoverable error.
+     */
     void run() {
         displayWelcome();
 
@@ -210,23 +228,27 @@ public class Runner {
         
         out.println("\n--- Processing Your Degree ---");
         
-        // Parse the input file
+        // File parsing builds the graph structure; done first so any format errors
+        // surface with line-number context before we attempt scheduling.
         out.println("▶ Reading course data from: " + filePath);
         Graph graph = FileParser.parseFile(filePath);
         out.println("  ✓ File parsed successfully");
 
-        // Validate the graph
+        // Cycle detection must happen before the planner runs — a cycle would cause
+        // planDegree() to loop indefinitely waiting for prerequisites that never clear.
         out.println("▶ Validating course structure...");
         FileParser.validateGraph(graph);
         out.println("  ✓ No circular dependencies detected");
         out.println("  ✓ All prerequisites are valid");
 
-        // Display graph information
+        // Surface key metrics so the user can confirm the file was interpreted correctly
+        // before committing to a potentially long scheduling run.
         out.println("\n--- Degree Summary ---");
         out.println("  Total Courses: " + graph.getSize());
         out.println("  Max Concurrent: " + maxConcurrent);
 
-        // Plan the degree
+        // DegreePlanner applies greedy topological scheduling; the result minimises
+        // total study periods subject to the user-supplied concurrency constraint.
         out.println("\n▶ Planning optimal degree schedule...");
         DegreePlanner planner = new DegreePlanner(graph, maxConcurrent);
         List<List<Course>> schedule = planner.planDegree();

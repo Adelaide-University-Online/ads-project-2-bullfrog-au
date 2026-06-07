@@ -46,7 +46,9 @@ public class FileParser {
             throw new IllegalArgumentException("File is empty");
         }
 
-        // Parse first line: all courses in the degree
+        // Line 1 establishes the complete course universe; every course code
+        // referenced later must exist here, so we build the graph nodes first
+        // before attempting to link any dependency edges.
         String[] allCourses = lines.get(0).split(",");
         for (String courseCode : allCourses) {
             courseCode = courseCode.trim();
@@ -55,7 +57,9 @@ public class FileParser {
             }
         }
 
-        // Parse remaining lines: prerequisites for each course
+        // A two-pass design is used: nodes are created above, edges are added here.
+        // This avoids forward-reference failures when a prerequisite appears later
+        // in the file than the course that depends on it.
         for (int i = 1; i < lines.size(); i++) {
             String[] parts = lines.get(i).split(",");
             if (parts.length > 0) {
@@ -67,7 +71,9 @@ public class FileParser {
                         " not found in the course list on line 1");
                 }
 
-                // Add prerequisites (all remaining parts on this line)
+                // Each token after the course code is an incoming dependency edge;
+                // validating against the course universe built in pass one catches
+                // typos and undeclared courses before they silently skew the schedule.
                 for (int j = 1; j < parts.length; j++) {
                     String prerequisiteCode = parts[j].trim();
                     if (!prerequisiteCode.isEmpty()) {

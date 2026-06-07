@@ -45,14 +45,18 @@ public class DegreePlanner {
     public List<List<Course>> planDegree() {
         schedule = new ArrayList<>();
 
-        // Track which courses have been completed
+        // Completed set acts as the eligibility gate — a course only becomes
+        // available once every prerequisite is present here, enforcing dependency order.
         Set<Course> completed = new HashSet<>();
 
-        // Continue until all courses are scheduled
+        // Greedy approach: fill each period with as many eligible courses as possible
+        // to minimise the total number of study periods required.
         while (completed.size() < graph.getSize()) {
             List<Course> currentPeriod = new ArrayList<>();
 
-            // Find courses that can be taken this period (all prerequisites completed)
+            // Only consider courses whose full prerequisite set is already satisfied,
+            // preventing out-of-order enrolment; the capacity cap enforces the
+            // concurrency constraint supplied by the user.
             for (Course course : graph.getAllCourses()) {
                 if (!completed.contains(course) && 
                     arePrerequisitesCompleted(course, completed) &&
@@ -62,12 +66,14 @@ public class DegreePlanner {
             }
 
             if (currentPeriod.isEmpty()) {
-                // This shouldn't happen if the graph is valid (no cycles)
+                // A deadlock here means the graph contains a cycle; cycle detection
+                // in FileParser should have caught this before reaching the planner.
                 throw new IllegalStateException(
                     "No courses can be scheduled. Check for circular dependencies.");
             }
 
-            // Sort courses in this period by name for consistent output
+            // Alphabetical sort ensures deterministic output regardless of
+            // HashMap's arbitrary iteration order, making results reproducible.
             currentPeriod.sort(Comparator.comparing(Course::getCourseCode));
             schedule.add(currentPeriod);
             completed.addAll(currentPeriod);
